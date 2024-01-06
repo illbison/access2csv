@@ -2,43 +2,29 @@ package main
 
 import (
 	"encoding/csv"
+	"flag"
 	"fmt"
 	"os"
 	"regexp"
 	"strings"
 	"time"
-
-	arg "github.com/alexflint/go-arg"
 )
 
 type args struct {
-	File   string `arg:"-f,--" placeholder:"<PATH>" help:"path to access.log file"`
-	Output string `arg:"-o,--" placeholder:"<PATH>" help:"path to output file"`
-}
-
-func (args) Description() string {
-	return "Convert Apache's (Combined Log Format) access.log to csv"
-}
-
-func (args) Version() string {
-	return "access2csv v1.0.1"
-}
-
-func (args args) CheckArgs() error {
-	if args.File == "" {
-		return fmt.Errorf("-f is required")
-	}
-	if args.Output == "" {
-		return fmt.Errorf("-o is required")
-	}
-	return nil
+	File        string
+	Output      string
+	ShowVersion bool
 }
 
 func main() {
-	args := args{}
-	arg.MustParse(&args)
+	args := ParseArgs()
 
-	if err := args.CheckArgs(); err != nil {
+	if args.ShowVersion {
+		ShowVersion()
+		os.Exit(0)
+	}
+
+	if err := args.CheckRequiredArgs(); err != nil {
 		fmt.Printf("Error: %s\n", err)
 		os.Exit(1)
 	}
@@ -103,4 +89,45 @@ func main() {
 		fmt.Printf("Error: failed to write data to %s\n", args.Output)
 		os.Exit(1)
 	}
+}
+
+func ParseArgs() args {
+	args := args{}
+
+	flag.StringVar(&args.File, "f", "", "")
+	flag.StringVar(&args.Output, "o", "", "")
+	flag.BoolVar(&args.ShowVersion, "v", false, "")
+
+	flag.Usage = func() {
+		fmt.Println(`Usage: access2csv -f <PATH> -o <PATH>
+
+    Convert Apache's (Combined Log Format) access.log to csv
+
+Required:
+  -f <PATH>    Path to access.log file
+  -o <PATH>    Path to output file
+
+Optional:
+  -h           Show this message and exit
+  -v           Show version and exit`)
+
+	}
+
+	flag.Parse()
+
+	return args
+}
+
+func ShowVersion() {
+	fmt.Println("access2csv 1.0.1")
+}
+
+func (args args) CheckRequiredArgs() error {
+	if args.File == "" {
+		return fmt.Errorf("-f is required")
+	}
+	if args.Output == "" {
+		return fmt.Errorf("-o is required")
+	}
+	return nil
 }
