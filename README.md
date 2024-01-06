@@ -12,13 +12,15 @@ A tool to parse and convert Apache's (Combined Log Format) access.log to csv
 ## Usage
 
 ```console
-Convert Apache's (Combined Log Format) access.log to csv
-access2csv 1.0.0
-Usage: access2csv [-f <PATH>] [-o <PATH>]
+Usage: access2csv -f <PATH> -o <PATH>
 
-Options:
-  -f <PATH>              path to access.log file
-  -o <PATH>              path to output file
-  --help, -h             display this help and exit
-  --version              display version and exit
+    Convert Apache's (Combined Log Format) access.log to csv
+
+Required:
+  -f <PATH>    Path to access.log file
+  -o <PATH>    Path to output file
+
+Optional:
+  -h           Show this message and exit
+  -v           Show version and exit
 ```
