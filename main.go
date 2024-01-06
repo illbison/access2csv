@@ -119,7 +119,7 @@ Optional:
 }
 
 func ShowVersion() {
-	fmt.Println("access2csv 1.0.1")
+	fmt.Println("access2csv 1.1.0")
 }
 
 func (args args) CheckRequiredArgs() error {
