@@ -21,15 +21,15 @@ func (args) Description() string {
 }
 
 func (args) Version() string {
-	return "access2csv v1.0.0"
+	return "access2csv v1.0.1"
 }
 
 func (args args) CheckArgs() error {
 	if args.File == "" {
-		return fmt.Errorf("Error: -f is required")
+		return fmt.Errorf("-f is required")
 	}
 	if args.Output == "" {
-		return fmt.Errorf("Error: -o is required")
+		return fmt.Errorf("-o is required")
 	}
 	return nil
 }
@@ -39,13 +39,14 @@ func main() {
 	arg.MustParse(&args)
 
 	if err := args.CheckArgs(); err != nil {
-		fmt.Println(err)
+		fmt.Printf("Error: %s\n", err)
 		os.Exit(1)
 	}
 
 	data, err := os.ReadFile(args.File)
 	if err != nil {
 		fmt.Printf("Error: failed to open %s\n", args.File)
+		os.Exit(1)
 	}
 
 	content := strings.Split(string(data), "\n")
