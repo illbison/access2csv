@@ -20,7 +20,7 @@ func main() {
 	}
 
 	if args.ShowVersion {
-		fmt.Printf("access2csv %s\n", version)
+		fmt.Printf("access2csv v%s\n", version)
 		os.Exit(0)
 	}
 
