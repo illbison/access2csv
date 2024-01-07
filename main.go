@@ -12,23 +12,16 @@ import (
 
 const version string = "1.1.0"
 
-type args struct {
-	File        string
-	Output      string
-	ShowVersion bool
-}
-
 func main() {
-	args := ParseArgs()
+	args, err := ParseArgs()
+	if err != nil {
+		fmt.Printf("Error: %s\n", err)
+		os.Exit(1)
+	}
 
 	if args.ShowVersion {
 		fmt.Printf("access2csv %s\n", version)
 		os.Exit(0)
-	}
-
-	if err := args.CheckRequiredArgs(); err != nil {
-		fmt.Printf("Error: %s\n", err)
-		os.Exit(1)
 	}
 
 	// open the source log file for reading line by line
@@ -88,8 +81,11 @@ func main() {
 	}
 }
 
-func ParseArgs() args {
-	args := args{}
+func ParseArgs() (args struct {
+	File        string
+	Output      string
+	ShowVersion bool
+}, _ error) {
 
 	flag.StringVar(&args.File, "f", "", "")
 	flag.StringVar(&args.Output, "o", "", "")
@@ -112,15 +108,17 @@ Optional:
 
 	flag.Parse()
 
-	return args
-}
+	if args.ShowVersion {
+		return args, nil
+	}
 
-func (args args) CheckRequiredArgs() error {
 	if args.File == "" {
-		return fmt.Errorf("-f is required")
+		return args, fmt.Errorf("-f is required")
 	}
+
 	if args.Output == "" {
-		return fmt.Errorf("-o is required")
+		return args, fmt.Errorf("-o is required")
 	}
-	return nil
+
+	return args, nil
 }
