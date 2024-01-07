@@ -10,6 +10,8 @@ import (
 	"time"
 )
 
+const version string = "1.1.0"
+
 type args struct {
 	File        string
 	Output      string
@@ -20,7 +22,7 @@ func main() {
 	args := ParseArgs()
 
 	if args.ShowVersion {
-		ShowVersion()
+		fmt.Printf("access2csv %s\n", version)
 		os.Exit(0)
 	}
 
@@ -111,10 +113,6 @@ Optional:
 	flag.Parse()
 
 	return args
-}
-
-func ShowVersion() {
-	fmt.Println("access2csv 1.1.0")
 }
 
 func (args args) CheckRequiredArgs() error {
