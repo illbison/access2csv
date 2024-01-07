@@ -1,12 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"encoding/csv"
 	"flag"
 	"fmt"
 	"os"
 	"regexp"
-	"strings"
 	"time"
 )
 
@@ -29,27 +29,41 @@ func main() {
 		os.Exit(1)
 	}
 
-	data, err := os.ReadFile(args.File)
+	// open the source log file for reading line by line
+	srcFile, err := os.Open(args.File)
 	if err != nil {
 		fmt.Printf("Error: failed to open %s\n", args.File)
 		os.Exit(1)
 	}
+	defer srcFile.Close()
+	scanner := bufio.NewScanner(srcFile)
 
-	content := strings.Split(string(data), "\n")
+	// open the output file to write each line parsed
+	outFile, err := os.Create(args.Output)
+	if err != nil {
+		fmt.Printf("Error: failed to create %s\n", args.Output)
+		os.Exit(1)
+	}
+	defer outFile.Close()
+
+	// create a csv writer and write headers
+	csvWriter := csv.NewWriter(outFile)
+	csvWriter.Write([]string{"Host", "Clientid", "Userid", "Timestamp", "Method", "Resource", "Protocol", "Status", "Size", "Referer", "User-agent"})
+	csvWriter.Flush()
 
 	pattern := regexp.MustCompile(`^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\s([^\s]+)\s([^\s]+)\s\[([^\]]+)\]\s"([A-Z]+)\s([^\s]+)\s([^"]+)"\s(\d{3})\s([^\s]+)\s"(.*)"\s"(.*)"$`)
 
-	var parsed [][]string
-
-	for index, value := range content {
-		if value == "" {
+	for i := 1; scanner.Scan(); i++ {
+		// read line and skip if empty
+		line := scanner.Text()
+		if line == "" {
 			continue
 		}
 
-		match := pattern.FindStringSubmatch(value)
+		match := pattern.FindStringSubmatch(line)
 
 		if len(match) == 0 {
-			fmt.Printf("Error: malformed structure at line %d\n", index+1)
+			fmt.Printf("Error: malformed structure at line %d\n", i)
 			continue
 		}
 
@@ -61,33 +75,14 @@ func main() {
 		// change the timestamp format
 		ts, err := time.Parse("02/Jan/2006:15:04:05 -0700", match[4])
 		if err != nil {
-			fmt.Printf("Error: failed to parse timestamp at line %d\n", index+1)
+			fmt.Printf("Error: failed to parse timestamp at line %d\n", i)
 		} else {
 			match[4] = ts.Format("02/01/2006 15:04:05 MST")
 		}
 
-		parsed = append(parsed, match[1:])
-	}
-
-	output, err := os.Create(args.Output)
-	if err != nil {
-		fmt.Printf("Error: failed to create %s\n", args.Output)
-		os.Exit(1)
-	}
-	defer output.Close()
-
-	fields := []string{"Host", "Clientid", "Userid", "Timestamp", "Method", "Resource", "Protocol", "Status", "Size", "Referer", "User-agent"}
-
-	writer := csv.NewWriter(output)
-
-	if err = writer.Write(fields); err != nil {
-		fmt.Printf("Error: failed to write headers to %s\n", args.Output)
-		os.Exit(1)
-	}
-
-	if err = writer.WriteAll(parsed); err != nil {
-		fmt.Printf("Error: failed to write data to %s\n", args.Output)
-		os.Exit(1)
+		// write parsed log slice to the output file
+		csvWriter.Write(match[1:])
+		csvWriter.Flush()
 	}
 }
 
