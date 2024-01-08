@@ -58,7 +58,7 @@ func main() {
 		match := pattern.FindStringSubmatch(line)
 
 		if len(match) == 0 {
-			fmt.Fprintf(os.Stderr, "Error: malformed structure at line %d\n", i)
+			fmt.Fprintf(os.Stderr, "Error: malformed log structure at line %d\n", i)
 			continue
 		}
 
