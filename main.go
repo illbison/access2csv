@@ -15,7 +15,7 @@ const version string = "1.1.1"
 func main() {
 	args, err := ParseArgs()
 	if err != nil {
-		fmt.Printf("Error: %s\n", err)
+		fmt.Fprintf(os.Stderr, "Error: %s\n", err)
 		os.Exit(1)
 	}
 
@@ -27,7 +27,7 @@ func main() {
 	// open the source log file for reading line by line
 	srcFile, err := os.Open(args.File)
 	if err != nil {
-		fmt.Printf("Error: failed to open %s\n", args.File)
+		fmt.Fprintf(os.Stderr, "Error: failed to open %s\n", args.File)
 		os.Exit(1)
 	}
 	defer srcFile.Close()
@@ -36,7 +36,7 @@ func main() {
 	// open the output file to write each line parsed
 	outFile, err := os.Create(args.Output)
 	if err != nil {
-		fmt.Printf("Error: failed to create %s\n", args.Output)
+		fmt.Fprintf(os.Stderr, "Error: failed to create %s\n", args.Output)
 		os.Exit(1)
 	}
 	defer outFile.Close()
@@ -58,7 +58,7 @@ func main() {
 		match := pattern.FindStringSubmatch(line)
 
 		if len(match) == 0 {
-			fmt.Printf("Error: malformed structure at line %d\n", i)
+			fmt.Fprintf(os.Stderr, "Error: malformed structure at line %d\n", i)
 			continue
 		}
 
@@ -70,7 +70,7 @@ func main() {
 		// change the timestamp format
 		ts, err := time.Parse("02/Jan/2006:15:04:05 -0700", match[4])
 		if err != nil {
-			fmt.Printf("Error: failed to parse timestamp at line %d\n", i)
+			fmt.Fprintf(os.Stderr, "Error: failed to parse timestamp at line %d\n", i)
 		} else {
 			match[4] = ts.Format("02/01/2006 15:04:05 MST")
 		}
